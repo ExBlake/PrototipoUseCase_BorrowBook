@@ -135,7 +135,7 @@ namespace BorrowBook
 
                 if (objTabla2.Read())
                 {
-                    txMensaje.Text = "NO SE PUEDE REALIZAR EL PRESTAMO, EL LIBRO ESTA RESERVADO";
+                    txMensaje.Text = "NOo SE PUEDE REALIZAR EL PRESTAMO, EL LIBRO ESTA RESERVADO";
                 }
                 else
                 {
