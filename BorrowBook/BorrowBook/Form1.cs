@@ -78,11 +78,12 @@ namespace BorrowBook
 
                     if (objTabla1.Read())
                     {
+                        var fecha = DateTime.Now.ToString("dd/MM/yyyy");
                         txCarnetCliente1.Text = objTabla1[0].ToString();
                         txNombreCliente.Text = objTabla1[1].ToString();
-                        
-
-
+                        txFechaPres.Text = fecha;
+                        var fecha2 = DateTime.Now.AddDays(7).ToString("dd/MM/yyyy");
+                        txFechaEntr.Text = fecha2;
                     }
                     else
                     {
@@ -90,11 +91,7 @@ namespace BorrowBook
                         txCarnetCliente1.Text = "";
                         txNombreCliente.Text = "";
                         txCarnetCliente.Focus();
-
                     }
-
-                    
-
                 }
             }
             catch (SqlException err)
@@ -105,85 +102,156 @@ namespace BorrowBook
 
         private void button2_Click(object sender, EventArgs e)
         {
-            //Insertar los datos de la factura a la base de datos.
+            
+            var fecha = DateTime.Now.ToString("dd/MM/yyyy");
+           
+            
             string codigo = txCodigoLibro1.Text;
             string titulolibro = txTituloLibro.Text;
             string carnet = txCarnetCliente1.Text;
             string nombre = txNombreCliente.Text;
             string fechaprestamo = txFechaPres.Text;
-            string fechaentrega = txFechaEnt.Text;
+            string fechaentrega = txFechaEntr.Text;
 
-            SqlConnection objConector1 = DB.conectar("BorrowBook");
-            string carnet1 = txCarnetCliente1.Text;
-            string query = "Select * from Moroso where CarnetCliente = '" + carnet1 + "'";
-            SqlDataReader objTabla1 = DB.consulta(query, objConector1);
-
-            if (objTabla1.Read())
+            if (string.IsNullOrEmpty(codigo) || string.IsNullOrEmpty(titulolibro) ||
+                              string.IsNullOrEmpty(carnet) || string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(fechaprestamo) || string.IsNullOrEmpty(fechaentrega))
             {
-                txMensaje.Text = "NO SE PUEDE REALIZAR EL PRESTAMO, EL CLIENTE ESTA MOROSO";
-                
-                
+
+                txMensaje.Text = ("INFORMACION INCOMPLETA");
             }
             else
             {
-                objConector1.Close();
-                objTabla1.Close();
-                SqlConnection objConector2 = DB.conectar("BorrowBook");
-                string codigo2 = txCodigoLibro1.Text;
-                string query1 = "Select * from Reserva where CodigoLibro = '" + codigo2 + "'";
-                SqlDataReader objTabla2 = DB.consulta(query1, objConector2);
+                SqlConnection objConector1 = DB.conectar("BorrowBook");
+                string carnet1 = txCarnetCliente1.Text;
+                string query = "Select * from Moroso where CarnetCliente = '" + carnet1 + "'";
+                SqlDataReader objTabla1 = DB.consulta(query, objConector1);
 
-                if (objTabla2.Read())
+                if (objTabla1.Read())
                 {
-                    txMensaje.Text = "NOo SE PUEDE REALIZAR EL PRESTAMO, EL LIBRO ESTA RESERVADO";
+                    txMensaje.Text = "NO SE PUEDE REALIZAR EL PRESTAMO, EL CLIENTE ESTA MOROSO";
                 }
                 else
                 {
-                    try
-                    {
-                        if (string.IsNullOrEmpty(codigo) || string.IsNullOrEmpty(titulolibro) ||
-                       string.IsNullOrEmpty(carnet) || string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(fechaprestamo) || string.IsNullOrEmpty(fechaentrega))
-                        {
+                    objConector1.Close();
+                    objTabla1.Close();
+                    SqlConnection objConector2 = DB.conectar("BorrowBook");
+                    string codigo2 = txCodigoLibro1.Text;
+                    string query1 = "Select * from Reserva where CodigoLibro = '" + codigo2 + "'";
+                    SqlDataReader objTabla2 = DB.consulta(query1, objConector2);
 
-                            txMensaje.Text = ("INFORMACION INCOMPLETA");
+                    if (objTabla2.Read())
+                    {
+                        txMensaje.Text = "NO SE PUEDE REALIZAR EL PRESTAMO, EL LIBRO ESTA RESERVADO";
+                    }
+                    else
+                    {
+                        objConector2.Close();
+                        objTabla2.Close();
+                        SqlConnection objConector3 = DB.conectar("BorrowBook");
+                        string libro = txConsularCodigoLibro.Text;
+                        string query2 = "Select * from Prestamos where CodigoLibro = " + libro + "";
+                        SqlDataReader objTabla3 = DB.consulta(query2, objConector3);
+                        if (objTabla3.Read())
+                        {
+                            txMensaje.Text = "NO SE PUEDE REALIZAR EL PRESTAMO, EL LIBRO YA FUE PRESTADO";
                         }
                         else
                         {
-                            //Comando para insertar datos a la tabla facturacion en la base de datos.
-                            SqlConnection objConector = DB.conectar("BorrowBook");
-                            string consultaSql = "insert into Prestamos values (" + codigo + ", " + carnet + ",'" + titulolibro +
-                                "', '" + nombre + "', '" + fechaprestamo + "', '" + fechaentrega + "')";
-                            int cont = DB.operar(consultaSql, objConector);
+                            objConector3.Close();
+                            objTabla3.Close();
 
-                            if (cont > 0)
+                            SqlConnection objConector4 = DB.conectar("BorrowBook");
+
+                            string query3 = "Select * from Moroso where CodigoLibro = " + carnet + "and TipoCliente = 'DOCENTE'";
+                            SqlDataReader objTabla4 = DB.consulta(query3, objConector4);
+                            if (objTabla4.Read())
                             {
-                                txCodigoLibro1.Text = "";
-                                txTituloLibro.Text = "";
-                                txCarnetCliente1.Text = "";
-                                txNombreCliente.Text = "";
-                                txFechaPres.Text = "";
-                                txFechaEnt.Text = "";
+                                txMensaje.Text = "RECORDAR AL DOCENTE ENTREGAR LOS LIBROS EN LA FECHA ESTABLECIDA, PRESTAMO REGISTRADO EXITOSAMENTE";
+                                try
+                                {
+                                    if (string.IsNullOrEmpty(codigo) || string.IsNullOrEmpty(titulolibro) ||
+                                   string.IsNullOrEmpty(carnet) || string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(fechaprestamo) || string.IsNullOrEmpty(fechaentrega))
+                                    {
 
-                                txMensaje.Text = "SE REGISTRO EL PRESTAMO EXITOSAMENTE";
+                                        txMensaje.Text = ("INFORMACION INCOMPLETA");
+                                    }
+                                    else
+                                    {
+                                        //Comando para insertar datos a la tabla facturacion en la base de datos.
+                                        SqlConnection objConector = DB.conectar("BorrowBook");
+                                        string consultaSql = "insert into Prestamos values (" + codigo + ", " + carnet + ",'" + titulolibro +
+                                            "', '" + nombre + "', '" + fechaprestamo + "', '" + fechaentrega + "')";
+                                        int cont = DB.operar(consultaSql, objConector);
+
+                                        if (cont > 0)
+                                        {
+                                            txCodigoLibro1.Text = "";
+                                            txTituloLibro.Text = "";
+                                            txCarnetCliente1.Text = "";
+                                            txNombreCliente.Text = "";
+                                            txFechaPres.Text = "";
+                                            txFechaEntr.Text = "";
+
+                                            txMensaje.Text = "SE REGISTRO EL PRESTAMO EXITOSAMENTE";
+                                        }
+                                        else
+                                        {
+                                            txMensaje.Text = ("¡Error!, Prestamo no registrado");
+                                            txMensaje.Text = "";
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show("Error" + ex);
+                                }
                             }
                             else
                             {
-                                txMensaje.Text = ("¡Error!, Prestamo no registrado");
-                                txMensaje.Text = "";
+                                try
+                                {
+                                    if (string.IsNullOrEmpty(codigo) || string.IsNullOrEmpty(titulolibro) ||
+                                   string.IsNullOrEmpty(carnet) || string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(fechaprestamo) || string.IsNullOrEmpty(fechaentrega))
+                                    {
+
+                                        txMensaje.Text = ("INFORMACION INCOMPLETA");
+                                    }
+                                    else
+                                    {
+                                        //Comando para insertar datos a la tabla facturacion en la base de datos.
+                                        SqlConnection objConector = DB.conectar("BorrowBook");
+                                        string consultaSql = "insert into Prestamos values (" + codigo + ", " + carnet + ",'" + titulolibro +
+                                            "', '" + nombre + "', '" + fechaprestamo + "', '" + fechaentrega + "')";
+                                        int cont = DB.operar(consultaSql, objConector);
+
+                                        if (cont > 0)
+                                        {
+                                            txCodigoLibro1.Text = "";
+                                            txTituloLibro.Text = "";
+                                            txCarnetCliente1.Text = "";
+                                            txNombreCliente.Text = "";
+                                            txFechaPres.Text = "";
+                                            txFechaEntr.Text = "";
+
+                                            txMensaje.Text = "SE REGISTRO EL PRESTAMO EXITOSAMENTE";
+                                        }
+                                        else
+                                        {
+                                            txMensaje.Text = ("¡Error!, Prestamo no registrado");
+                                            txMensaje.Text = "";
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show("Error" + ex);
+                                }
                             }
+
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Error" + ex);
-                    }
                 }
-                
-
             }
-
-           
-
             
         }
 
@@ -191,6 +259,27 @@ namespace BorrowBook
         {
             txMensaje.Text = "";
             txCarnetCliente.Focus();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            txCarnetCliente.Text = "";
+            txNombreCliente.Text = "";
+            txCodigoLibro1.Text = "";
+            txTituloLibro.Text = "";
+            txCarnetCliente1.Text = "";
+            txNombreCliente.Text = "";
+            txConsularCodigoLibro.Text = "";
+            txFechaPres.Text = "";
+            txFechaEntr.Text = "";
+            txMensaje.Text = "";
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+           
+            this.Close();
+            
         }
     }
 }
