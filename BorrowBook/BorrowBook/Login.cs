@@ -81,5 +81,13 @@ namespace BorrowBook
             var recoverPassword = new RecuperarContraseña();
             recoverPassword.ShowDialog();
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //Invoca el formulario de Registro de usuarios.
+            RegistroUsuarios objRegUser = new RegistroUsuarios();
+            objRegUser.Show();
+            this.Hide();
+        }
     }
 }

@@ -15,7 +15,9 @@ namespace BorrowBook
 {
     public partial class Form1 : Form
     {
-       
+        public static string Correousuario;
+        public static string CarnetCliente;
+        
         public Form1()
         {
             InitializeComponent();
@@ -33,7 +35,8 @@ namespace BorrowBook
 
         private void Consultar_Click(object sender, EventArgs e)
         {
-            
+            Correousuario = txtUserEmail.Text;
+            CarnetCliente = txCarnetCliente.Text;
             try
             {
                 //Busca apartir del codigo, un articulo en la base de datos
@@ -81,6 +84,7 @@ namespace BorrowBook
                         var fecha = DateTime.Now.ToString("dd/MM/yyyy");
                         txCarnetCliente1.Text = objTabla1[0].ToString();
                         txNombreCliente.Text = objTabla1[1].ToString();
+                        txtUserEmail.Text = objTabla1[3].ToString();
                         txFechaPres.Text = fecha;
                         var fecha2 = DateTime.Now.AddDays(7).ToString("dd/MM/yyyy");
                         txFechaEntr.Text = fecha2;

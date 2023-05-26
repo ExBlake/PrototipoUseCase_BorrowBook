@@ -8,8 +8,11 @@ using System.Threading.Tasks;
 
 namespace BorrowBook.Clases
 {
+    
     internal class UserDao : ConnectionToSql
     {
+
+        
         public string recoverPassword(string userRequesting)
         {
             using (var connection = GetConnection())
