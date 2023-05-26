@@ -15,9 +15,6 @@ namespace BorrowBook
 {
     public partial class Form1 : Form
     {
-        public static string Correousuario;
-        public static string CarnetCliente;
-        
         public Form1()
         {
             InitializeComponent();
@@ -35,8 +32,6 @@ namespace BorrowBook
 
         private void Consultar_Click(object sender, EventArgs e)
         {
-            Correousuario = txtUserEmail.Text;
-            CarnetCliente = txCarnetCliente.Text;
             try
             {
                 //Busca apartir del codigo, un articulo en la base de datos
@@ -84,7 +79,6 @@ namespace BorrowBook
                         var fecha = DateTime.Now.ToString("dd/MM/yyyy");
                         txCarnetCliente1.Text = objTabla1[0].ToString();
                         txNombreCliente.Text = objTabla1[1].ToString();
-                        txtUserEmail.Text = objTabla1[3].ToString();
                         txFechaPres.Text = fecha;
                         var fecha2 = DateTime.Now.AddDays(7).ToString("dd/MM/yyyy");
                         txFechaEntr.Text = fecha2;
@@ -164,92 +158,43 @@ namespace BorrowBook
                             objConector3.Close();
                             objTabla3.Close();
 
-                            SqlConnection objConector4 = DB.conectar("BorrowBook");
-
-                            string query3 = "Select * from Moroso where CodigoLibro = " + carnet + "and TipoCliente = 'DOCENTE'";
-                            SqlDataReader objTabla4 = DB.consulta(query3, objConector4);
-                            if (objTabla4.Read())
+                            try
                             {
-                                txMensaje.Text = "RECORDAR AL DOCENTE ENTREGAR LOS LIBROS EN LA FECHA ESTABLECIDA, PRESTAMO REGISTRADO EXITOSAMENTE";
-                                try
+                                if (string.IsNullOrEmpty(codigo) || string.IsNullOrEmpty(titulolibro) ||
+                               string.IsNullOrEmpty(carnet) || string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(fechaprestamo) || string.IsNullOrEmpty(fechaentrega))
                                 {
-                                    if (string.IsNullOrEmpty(codigo) || string.IsNullOrEmpty(titulolibro) ||
-                                   string.IsNullOrEmpty(carnet) || string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(fechaprestamo) || string.IsNullOrEmpty(fechaentrega))
-                                    {
 
-                                        txMensaje.Text = ("INFORMACION INCOMPLETA");
+                                    txMensaje.Text = ("INFORMACION INCOMPLETA");
+                                }
+                                else
+                                {
+                                    //Comando para insertar datos a la tabla facturacion en la base de datos.
+                                    SqlConnection objConector = DB.conectar("BorrowBook");
+                                    string consultaSql = "insert into Prestamos values (" + codigo + ", " + carnet + ",'" + titulolibro +
+                                        "', '" + nombre + "', '" + fechaprestamo + "', '" + fechaentrega + "')";
+                                    int cont = DB.operar(consultaSql, objConector);
+
+                                    if (cont > 0)
+                                    {
+                                        txCodigoLibro1.Text = "";
+                                        txTituloLibro.Text = "";
+                                        txCarnetCliente1.Text = "";
+                                        txNombreCliente.Text = "";
+                                        txFechaPres.Text = "";
+                                        txFechaEntr.Text = "";
+
+                                        txMensaje.Text = "SE REGISTRO EL PRESTAMO EXITOSAMENTE";
                                     }
                                     else
                                     {
-                                        //Comando para insertar datos a la tabla facturacion en la base de datos.
-                                        SqlConnection objConector = DB.conectar("BorrowBook");
-                                        string consultaSql = "insert into Prestamos values (" + codigo + ", " + carnet + ",'" + titulolibro +
-                                            "', '" + nombre + "', '" + fechaprestamo + "', '" + fechaentrega + "')";
-                                        int cont = DB.operar(consultaSql, objConector);
-
-                                        if (cont > 0)
-                                        {
-                                            txCodigoLibro1.Text = "";
-                                            txTituloLibro.Text = "";
-                                            txCarnetCliente1.Text = "";
-                                            txNombreCliente.Text = "";
-                                            txFechaPres.Text = "";
-                                            txFechaEntr.Text = "";
-
-                                            txMensaje.Text = "SE REGISTRO EL PRESTAMO EXITOSAMENTE";
-                                        }
-                                        else
-                                        {
-                                            txMensaje.Text = ("¡Error!, Prestamo no registrado");
-                                            txMensaje.Text = "";
-                                        }
+                                        txMensaje.Text = ("¡Error!, Prestamo no registrado");
+                                        txMensaje.Text = "";
                                     }
-                                }
-                                catch (Exception ex)
-                                {
-                                    MessageBox.Show("Error" + ex);
                                 }
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                try
-                                {
-                                    if (string.IsNullOrEmpty(codigo) || string.IsNullOrEmpty(titulolibro) ||
-                                   string.IsNullOrEmpty(carnet) || string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(fechaprestamo) || string.IsNullOrEmpty(fechaentrega))
-                                    {
-
-                                        txMensaje.Text = ("INFORMACION INCOMPLETA");
-                                    }
-                                    else
-                                    {
-                                        //Comando para insertar datos a la tabla facturacion en la base de datos.
-                                        SqlConnection objConector = DB.conectar("BorrowBook");
-                                        string consultaSql = "insert into Prestamos values (" + codigo + ", " + carnet + ",'" + titulolibro +
-                                            "', '" + nombre + "', '" + fechaprestamo + "', '" + fechaentrega + "')";
-                                        int cont = DB.operar(consultaSql, objConector);
-
-                                        if (cont > 0)
-                                        {
-                                            txCodigoLibro1.Text = "";
-                                            txTituloLibro.Text = "";
-                                            txCarnetCliente1.Text = "";
-                                            txNombreCliente.Text = "";
-                                            txFechaPres.Text = "";
-                                            txFechaEntr.Text = "";
-
-                                            txMensaje.Text = "SE REGISTRO EL PRESTAMO EXITOSAMENTE";
-                                        }
-                                        else
-                                        {
-                                            txMensaje.Text = ("¡Error!, Prestamo no registrado");
-                                            txMensaje.Text = "";
-                                        }
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    MessageBox.Show("Error" + ex);
-                                }
+                                MessageBox.Show("Error" + ex);
                             }
 
                         }
