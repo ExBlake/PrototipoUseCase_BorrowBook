@@ -169,6 +169,7 @@
             this.Controls.Add(this.PanelSuperir);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "RecuperarContraseña";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "RecuperarContraseña";
             this.PanelSuperir.ResumeLayout(false);
             this.PanelSuperir.PerformLayout();
